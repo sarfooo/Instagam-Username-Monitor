@@ -25,7 +25,6 @@ func createActiveSession() []string {
 	panic("Please restart A/C with at least 1 active Instagram session")
 }
 
-// buildGraphQLSingle retains the single-username GraphQL request path.
 func buildGraphQLSingle() []string {
 	bodies := make([]string, 0, len(usernames))
 	for _, username := range usernames {
@@ -34,7 +33,6 @@ func buildGraphQLSingle() []string {
 	return bodies
 }
 
-// These builders retain the other GraphQL request formats without invoking them by default.
 func buildGraphQLClientRedirect(batch []string) string {
 	ids := strings.Join(batch, `\",\"credential_type\":\"none\",\"token\":\"\"},{\"uid\":\"`)
 	return fmt.Sprintf(`https://i.instagram.com/graphql_www?doc_id=7765850536785467&variables={"input":{"params":"{\"account_list\":[{\"uid\":\"%s\",\"credential_type\":\"none\",\"token\":\"\"}]}"}}`, ids)
