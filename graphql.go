@@ -1,44 +1,34 @@
 package main
 
 import (
-	"bytes"
+	"github.com/valyala/fasthttp"
 	"log"
 	"strings"
 	"time"
-
-	"github.com/valyala/fasthttp"
 )
 
-func graphQLSingle(client *fasthttp.Client, indexChannel <-chan int) {
-	request := createRequest("POST", "", "br")
-	response := fasthttp.AcquireResponse()
-	defer fasthttp.ReleaseRequest(request)
-	defer fasthttp.ReleaseResponse(response)
-
-	for index := range indexChannel {
+func graphQLSingle(client *fasthttp.Client, indexChannel chan int) {
+	request := createFastHTTPRequest("POST", "", true, false, "br")
+	POSTResponse := createFastHTTPResponse(false)
+	HEADResponse := createFastHTTPResponse(true)
+	for {
+		index := <-indexChannel
 		request.SetRequestURI(usernameBodies[index])
-		request.Header.Set("Cookie", "ds_user_id=0")
-		if err := client.Do(request, response); err != nil {
-			log.Printf("request for @%s: %v", usernames[index], err)
-			continue
-		}
-		body, err := response.BodyUnbrotli()
-		if err != nil {
-			log.Printf("decode response for @%s: %v", usernames[index], err)
-			continue
-		}
-		if !bytes.Contains(body, usernameMatches[index]) {
-			if spammerUsernameIndex == -1 {
-				spammerUsernameIndex = index
-				usernameChangeRequest = usernameChangeRequests[index]
-				globalConnection.Write(usernameChangeRequest)
-				response.Read(globalBuffer)
+		request.Header.Set("Cookie", "ds_user_id="+randomIntString(11))
+		client.Do(request, POSTResponse)
+		size := len(POSTResponse.Body())
 
-				log.Printf("Detected @%s %s \n\n", usernames[index], strings.Repeat(" ", 60))
-				time.Sleep(time.Millisecond * 500)
-				usernameChangeRequest = nil
-				spammerUsernameIndex = -1
-			}
+		if size == 53 && spammerUsernameIndex == -1 {
+			spammerUsernameIndex = index
+			usernameChangeRequest = usernameChangeRequests[spammerUsernameIndex]
+			globalConnection.Write(usernameChangeRequest)
+			HEADResponse.Read(globalBuffer)
+
+			log.Printf("Detected @%s %s \n\n", usernames[index], strings.Repeat(" ", 60))
+			time.Sleep(SpammerDuration)
+			usernameChangeRequest = nil
+			spammerUsernameIndex = -1
 		}
+		request.Header.DelAllCookies()
 	}
 }

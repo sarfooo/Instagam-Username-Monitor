@@ -2,10 +2,19 @@ package main
 
 import (
 	"bufio"
+	"github.com/valyala/fastrand"
 	"os"
 	"strconv"
 	"strings"
 )
+
+func randomIntString(length int) string {
+	bytes := make([]byte, length)
+	for i := range bytes {
+		bytes[i] = byte(49 + fastrand.Uint32n(9))
+	}
+	return string(bytes)
+}
 
 func openFile(filename string) (slice []string) {
 	file, _ := os.Open(filename)

@@ -11,9 +11,8 @@ func buildState() {
 	usernameBodies = buildGraphQLSingle()
 	activeSession = createActiveSession()
 	usernameChangeRequests = buildUsernameChangeRequests()
-	usernameMatches = make([][]byte, len(usernames))
-	for i, username := range usernames {
-		usernameMatches[i] = []byte(fmt.Sprintf(`"username":"%s"`, username))
+	for i := range usernames {
+		usernameMatches = append(usernameMatches, []byte(fmt.Sprintf(`"username":"%s"`, usernames[i])))
 	}
 }
 
@@ -25,10 +24,9 @@ func createActiveSession() []string {
 	panic("Please restart A/C with at least 1 active Instagram session")
 }
 
-func buildGraphQLSingle() []string {
-	bodies := make([]string, 0, len(usernames))
-	for _, username := range usernames {
-		bodies = append(bodies, fmt.Sprintf(`https://i.instagram.com/graphql_www?doc_id=6881983411865519&variables={"username":"%s"}`, username))
+func buildGraphQLSingle() (bodies []string) {
+	for i := range usernames {
+		bodies = append(bodies, fmt.Sprintf(`https://i.instagram.com/graphql_www?doc_id=6881983411865519&variables={"username":"%s"}`, usernames[i]))
 	}
 	return bodies
 }

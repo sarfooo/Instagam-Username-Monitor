@@ -14,9 +14,9 @@ func main() {
 	activeSessions = openFile("./data/active_sessions.txt")
 	fmt.Printf("Active Sessions: %s \n", formatNumber(int64(len(activeSessions))))
 
-	var workers int
+	var goroutines int
 	fmt.Printf("Goroutines: ")
-	fmt.Scanln(&workers)
+	fmt.Scanln(&goroutines)
 	fmt.Println()
 
 	proxies := openFile("./data/proxies.txt")
@@ -26,13 +26,13 @@ func main() {
 	spammerDummyRequest = []byte(getDummyRequest())
 	globalConnection, globalBuffer = createTLSConnection()
 	go connectionRefresher(&globalConnection, &globalBuffer)
-	client, proxyChannel := createProxyClient(workers)
-	indexChannel := make(chan int, workers)
+	proxyClient, proxyChannel := createProxyClient(goroutines)
+	indexChannel := make(chan int, 1)
 
-	for i := 0; i < workers; i++ {
-		go graphQLSingle(client, indexChannel)
+	for i := 0; i < goroutines; i++ {
+		go graphQLSingle(proxyClient, indexChannel)
 	}
-	for i := 0; i < 25; i++ {
+	for i := 0; i < SpammerGoroutines; i++ {
 		go usernameSpammer()
 	}
 	go spammerSessionRotater()

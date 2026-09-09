@@ -3,6 +3,12 @@ package main
 import (
 	"bufio"
 	"crypto/tls"
+	"time"
+)
+
+const (
+	SpammerGoroutines = 25
+	SpammerDuration   = time.Millisecond * 500
 )
 
 var (
