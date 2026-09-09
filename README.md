@@ -1,14 +1,14 @@
-# Instagram Autoclaimer
+# Instagram Username Monitor
 
-A Go username autoclaimer that monitors configured Instagram usernames through GraphQL and sends username-change requests when a target becomes available.
+A Go username monitor that checks configured Instagram usernames through GraphQL and reports availability signals.
 
 ## How It Works
 
 - Loads target usernames, active sessions, and proxies from `./data`.
 - Builds GraphQL username-check requests for every configured target.
 - Sends checks through the proxy client with the selected number of goroutines.
-- Keeps TLS connections open for the claim workers.
-- Switches the claim workers from the dummy request to the detected username's prebuilt request when the GraphQL response signals availability.
+- Keeps TLS connections open for the monitoring workers.
+- Detects availability signals from GraphQL responses.
 
 ## Files
 
@@ -25,7 +25,3 @@ go run .
 ```
 
 Enter the number of monitor goroutines when prompted.
-
-## Public Source
-
-This repository contains the GraphQL monitoring and claim flow. The bulk-route monitor, bulk endpoints, banned-session handling, runtime data, and credentials are intentionally not included.
