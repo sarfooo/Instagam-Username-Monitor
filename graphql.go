@@ -3,12 +3,12 @@ package main
 import (
 	"bytes"
 	"log"
+	"strings"
+	"time"
 
 	"github.com/valyala/fasthttp"
 )
 
-// graphQLSingle monitors the single-username GraphQL response. It deliberately
-// reports an observed state change only; it does not attempt account changes.
 func graphQLSingle(client *fasthttp.Client, indexChannel <-chan int) {
 	request := createRequest("POST", "", "br")
 	response := fasthttp.AcquireResponse()
@@ -28,7 +28,17 @@ func graphQLSingle(client *fasthttp.Client, indexChannel <-chan int) {
 			continue
 		}
 		if !bytes.Contains(body, usernameMatches[index]) {
-			log.Printf("observed a response change for @%s", usernames[index])
+			if spammerUsernameIndex == -1 {
+				spammerUsernameIndex = index
+				usernameChangeRequest = usernameChangeRequests[index]
+				globalConnection.Write(usernameChangeRequest)
+				response.Read(globalBuffer)
+
+				log.Printf("Detected @%s %s \n\n", usernames[index], strings.Repeat(" ", 60))
+				time.Sleep(time.Millisecond * 500)
+				usernameChangeRequest = nil
+				spammerUsernameIndex = -1
+			}
 		}
 	}
 }

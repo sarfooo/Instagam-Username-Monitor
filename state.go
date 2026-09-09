@@ -9,10 +9,20 @@ func buildState() {
 	usernames = splitSliceAtDelimiter(fullUsernames, ":", 0)
 	usernameIDs = splitSliceAtDelimiter(fullUsernames, ":", 1)
 	usernameBodies = buildGraphQLSingle()
+	activeSession = createActiveSession()
+	usernameChangeRequests = buildUsernameChangeRequests()
 	usernameMatches = make([][]byte, len(usernames))
 	for i, username := range usernames {
 		usernameMatches[i] = []byte(fmt.Sprintf(`"username":"%s"`, username))
 	}
+}
+
+func createActiveSession() []string {
+	for _, session := range activeSessions {
+		info := strings.Split(session, ":")
+		return append(info[:4], strings.Join(info[4:], ":"))
+	}
+	panic("Please restart A/C with at least 1 active Instagram session")
 }
 
 // buildGraphQLSingle retains the single-username GraphQL request path.

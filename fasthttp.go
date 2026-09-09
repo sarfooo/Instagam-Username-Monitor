@@ -29,3 +29,9 @@ func createRequest(method, url, encoding string) *fasthttp.Request {
 	}
 	return request
 }
+
+func createFastHTTPResponse(skipBody bool) *fasthttp.Response {
+	response := fasthttp.AcquireResponse()
+	response.SkipBody = skipBody
+	return response
+}
